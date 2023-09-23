@@ -1,0 +1,20 @@
+<%- include('./partials/header.ejs') %>
+
+<% orders.forEach(order => { %>
+    <h2>Items:</h2>
+    <% order.items.forEach(element => { %>
+        <% if(element.item){ %>
+            <h3>Name: <%- element.item.name %></h3>
+            <h4>quantity: <%-element.quantity %></h4>
+        <% } %>
+    <% }) %>
+    <br>
+    <h3>Status: <%- order.status %></h3>
+    <h3>Address: <%- order.address %></h3>
+    <h3>Date: <%- order.date %></h3>
+    <br>
+    <a href="/order/delete/<%- order._id %>"> <button>Delete order</button> </a>
+    <br><hr><br>
+<% }) %>
+
+<%- include('./partials/footer.ejs') %>

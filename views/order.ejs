@@ -1,0 +1,46 @@
+<%- include('./partials/header.ejs') %>
+
+<form>
+    <label for="address">Address</label>
+    <input type="text" name="address" required>
+    <button type="submit">Order</button>
+    <div class="order done"></div>
+</form>
+
+<script>
+    const form = document.querySelector('form');
+    const done = document.querySelector('.order.done');
+    const User = <%- JSON.stringify(user) %>;
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const address = form.address.value;
+        const addJson = JSON.stringify({address});
+
+        const res = await fetch(`/order/${User._id}`, {
+            method: 'POST',
+            headers: {'content-type': 'application/json'},
+            body: addJson
+        });
+        const data = await res.json();
+        if(data.done){
+            location.assign('/items');
+        }
+        else{
+            const count = Object.keys(data).length;
+            let i = 0;
+            for(let item in data){
+                if(i == count-1){
+                    done.textContent += `maximum quantity for ${item} is ${data[item]}`; 
+                }
+                else{
+                    done.textContent += `maximum quantity for ${item} is ${data[item]} & `; 
+                }
+                i++;
+            }
+        }
+    })
+</script>
+
+<%- include('./partials/footer.ejs') %>

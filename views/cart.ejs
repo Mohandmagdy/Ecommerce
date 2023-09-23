@@ -1,0 +1,54 @@
+<%- include('./partials/header.ejs') %>
+
+<% items.forEach((element, index) => { %>
+    <% if(element.item) { %>
+        <h3><%- element.item.name %></h3>
+        <p><%- element.item.description %></p>
+        <h5>category: <%- element.item.category %></h5>
+        <h5>Price: <%- element.item.price %></h5>
+        <h5>Quantity: <%- element.quantity %></h5>
+        <h5>pieces left: <%- element.item.count %></h5>
+        <h5>Rating: <%- element.item.rating %></h5>
+        <input type="text" id="input<%- index %>" value="<%- element.value %>">
+        <div class="quantity error"></div>
+        <a href="/cart/delete/<%- cart.id %>/<%- element.item.id %>"><button>Delete</button></a><hr>
+    <% } %>
+<% }); %>
+<% if (items.length) { %>
+    <a href="/order"><button>Make an order</button></a>
+<% } %>
+
+<script>
+    const Cart = <%- JSON.stringify(cart) %>;
+    const elements = <%- JSON.stringify(items) %>;
+    const quantityError = document.querySelector('.quantity.error');
+
+    quantityError.textContent = '';
+
+    elements.forEach((element, index) => {
+        quantityError.textContent = '';
+        const inputElement = document.getElementById(`input${index}`);
+        inputElement.addEventListener('input', (event) => {
+            const quantity = event.target.value;
+            if(element.item.count >= quantity){
+                const obj = {'cart': Cart, 'item': element.item, quantity};
+                fetch('/cart/edit', {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify(obj)
+                }).then(result => {
+                    location.assign(`/cart/${Cart._id}`);
+                }).catch(err => {
+                    console.log(err);
+                }); 
+            }
+            else{
+                quantityError.textContent = `maximum quantity is ${element.item.count}`;
+            }
+        });
+    });
+    
+</script>
+
+
+<%- include('./partials/footer.ejs') %>

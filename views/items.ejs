@@ -1,0 +1,29 @@
+<%- include('./partials/header.ejs') %>
+
+<form action="/items/searchbyname" method="post">
+    <input type="text" placeholder="Search by name" name="content">
+    <button>Search</button>
+</form>
+
+<form action="/items/searchbycategory" method="post">
+    <select name="category">
+        <option value="">category</option>
+        <option value="drink">Drink</option>
+        <option value="electronics">Electronics</option>
+        <option value="cosmetics">Cosmetics</option>
+        <option value="food">Food</option>
+        <option value="media">Media</option>
+    </select>
+    <button>Search</button>
+</form>
+
+<% items.forEach(element => { %>
+    <a href="/items/<%-element.id%>"><h3><%- element.name %></h3></a>
+    <p><%- element.description %></p>
+    <h5>category: <%- element.category %></h5>
+    <h5>Price: <%- element.price %></h5>
+    <h5>pieces left: <%- element.count %></h5>
+    <h5>Rating: <%- element.rating %></h5><hr>
+<% }); %>
+
+<%- include('./partials/footer.ejs') %>
