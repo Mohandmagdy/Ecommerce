@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded());
 
-mongoose.connect('mongodb://127.0.0.1:27017/ecommerce')
+mongoose.connect('mongodb+srv://honda:baba@cluster0.ggicybj.mongodb.net/?retryWrites=true&w=majority')
     .then(result => {
         app.listen(3000);
     }).catch(err => {
