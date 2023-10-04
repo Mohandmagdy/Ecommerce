@@ -22,8 +22,12 @@
     <p><%- element.description %></p>
     <h5>category: <%- element.category %></h5>
     <h5>Price: <%- element.price %></h5>
-    <h5>pieces left: <%- element.count %></h5>
-    <h5>Rating: <%- element.rating %></h5><hr>
+    <% if (!element.count){ %>
+        <h5 style="color: red;">Out of stock</h5>
+    <% }else{ %>
+        <h5>pieces left: <%- element.count %></h5>
+    <% } %>
+    <h5>Store: <%- element.store.name%></h5><hr>
 <% }); %>
 
 <%- include('./partials/footer.ejs') %>

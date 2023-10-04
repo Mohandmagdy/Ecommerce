@@ -2,13 +2,13 @@ const Item = require('../models/item');
 const Cart = require('../models/cart');
 
 const getItems = async (req, res) => {
-    const items = await Item.find();
+    const items = await Item.find().populate('store');
     res.render('items', {items});
 };
 
 const getDetails = async (req, res) => {
     const id = req.params.id;
-    const item = await Item.findById(id);
+    const item = await Item.findById(id).populate('store');
     res.render('details', {element:item});
 }
 
@@ -38,7 +38,7 @@ const searchByName = async (req, res) => {
     const content = req.body.content;
     const items = await Item.find({name: {$regex: content, $options: 'i'}});
     res.render('items', {items});
-}
+};
 
 const searchByCategory = async (req, res) => {
     const content = req.body.category;
@@ -51,14 +51,25 @@ const getStoreItems = async (req, res) => {
 
     const items = await Item.find({store: id});
     res.render('items', {items});
-}
+};
 
 const editItem = async (req, res) => {
     const itemid = req.params.id;
     const quantity = req.body.quantity;
 
     const result = await Item.findByIdAndUpdate(itemid, { "$set" : { 'count' : quantity }});
-}
+};
+
+const store_edit = (req, res) => {
+    const id = req.params.id;
+    Item.findByIdAndUpdate(id, { $set: { name: req.body.name, description: req.body.description, price: req.body.price, count: req.body.quantity }})
+        .then(result => {
+            res.json({});
+        }).catch(err => {
+            const errors = {description: 'item description must be more than 20 characters'};
+            res.json({errors});
+        })
+};
 
 module.exports = {
     getItems,
@@ -69,4 +80,5 @@ module.exports = {
     searchByCategory,
     getStoreItems,
     editItem,
+    store_edit
 }

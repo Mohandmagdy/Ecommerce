@@ -1,64 +1,114 @@
 <%- include('./partials/header.ejs') %>
+<% if (user && user.role == 'store' && element.store.id == user.id){ %>
 
-
-<h3><%- element.name %></h3>
-<p><%- element.description %></p>
-<h5>category: <%- element.category %></h5>
-<h5>Price: <%- element.price %></h5>
-<h5>pieces left: <%- element.count %></h5>
-<h5>Rating: <%- element.rating %></h5>
-<% if(user) { %>
-    <form>
-        <label for="quantity">Quantity</label>
-        <input type="number" name="quant">
-        <button type="submit">Add to cart</button>
-        <div class="quantity error"></div>
+    <form class="outerForm">
+        <label for="name">Name</label>
+        <input type="text" value="<%- element.name %>" name="name" required>
+        <label for="description">Description</label>
+        <input type="text" value="<%- element.description %>" name="description" required>
+        <div class="description error"></div>
+        <label for="price">Price</label>
+        <input type="number" value="<%- element.price %>" name="price" required>
+        <label for="quantity">quantity</label>
+        <input type="number" value="<%- element.count %>" name="quantity" required>
+        <button type="submit">Update</button>
     </form>
+
+<% }else{ %>
+    <h3><%- element.name %></h3>
+    <p><%- element.description %></p>
+    <h5>category: <%- element.category %></h5>
+    <h5>Price: <%- element.price %></h5>
+    <% if (!element.count){ %>
+        <h5 style="color: red;">Out of stock</h5>
+    <% }else{ %>
+        <h5>pieces left: <%- element.count %></h5>
+    <% } %>
+    <h5>Store: <%- element.store.name%></h5><hr>
+    <% if(user && user.role == 'customer') { %>
+        <form class="innerForm">
+            <label for="quantity">Quantity</label>
+            <input type="number" name="quant">
+            <button type="submit">Add to cart</button>
+            <div class="quantity error"></div>
+        </form>
+    <% } %>
 <% } %>
 
+
 <script>
-    const form = document.querySelector('form');
+    const quantityForm = document.querySelector('.innerForm');
+    const editForm = document.querySelector('.outerForm');
     const item = <%- JSON.stringify(element) %>;
     const currUser = <%- JSON.stringify(user) %>;
-    const quantityError = document.querySelector('.quantity.error');
-    quantityError.textContent = '';
 
-    form.addEventListener('submit', (event) => {
-        event.preventDefault(); 
+    if (currUser && currUser.role == 'store' && item.store.email == currUser.email){
+        const descriptionError = document.querySelector('.description.error');
+        descriptionError.textContent = '';
 
-        const quantity = form.quant.value;
-        if(currUser.role == 'customer'){
-            if(item.count < quantity){
-                quantityError.textContent = 'Out of stock';
+        editForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            
+            const myform = new FormData(event.target);
+            const values = Object.fromEntries(myform.entries());
+
+            const res = await fetch(`store/edit/${item._id}`, {
+                method: 'POST',
+                headers: {'content-type': 'application/json'},
+                body: JSON.stringify(values)
+            });
+
+            const data = await res.json();
+            if(data.errors){
+                descriptionError.textContent = data.errors.description;
+            }
+            else{
+                location.assign('/');
+            }
+        });
+    }else if(currUser && currUser.role == 'customer'){
+        const quantityError = document.querySelector('.quantity.error');
+        quantityError.textContent = '';
+
+
+        quantityForm.addEventListener('submit', (event) => {
+            event.preventDefault(); 
+
+            const quantity = quantityForm.quant.value;
+            if(currUser.role == 'customer'){
+                if(item.count < quantity){
+                    quantityError.textContent = 'Out of stock';
+                }
+                else{
+                    quantJson = JSON.stringify({quantity});
+
+                    fetch(`/cart/${currUser._id}/${item._id}`, {
+                        method: 'POST',
+                        headers: {'content-type': 'application/json'},
+                        body: quantJson
+                    }).then(result => {
+                        location.assign('/items');
+                    }).catch(err => {
+                        console.log('err');
+                    });
+                }
             }
             else{
                 quantJson = JSON.stringify({quantity});
 
-                fetch(`/cart/${currUser._id}/${item._id}`, {
-                    method: 'POST',
-                    headers: {'content-type': 'application/json'},
-                    body: quantJson
-                }).then(result => {
-                    location.assign('/items');
-                }).catch(err => {
-                    console.log('err');
-                });
+                    fetch(`/items/edit/${item._id}`, {
+                        method: 'POST',
+                        headers: {'content-type': 'application/json'},
+                        body: quantJson
+                    }).then(result => {
+                        location.assign(`/items/store/${currUser._id}`);
+                    }).catch(err => {
+                        console.log('err');
+                    });
             }
-        }
-        else{
-            quantJson = JSON.stringify({quantity});
+        });
+    }
 
-                fetch(`/items/edit/${item._id}`, {
-                    method: 'POST',
-                    headers: {'content-type': 'application/json'},
-                    body: quantJson
-                }).then(result => {
-                    location.assign(`/items/store/${currUser._id}`);
-                }).catch(err => {
-                    console.log('err');
-                });
-        }
-    });
 </script>
 
 
